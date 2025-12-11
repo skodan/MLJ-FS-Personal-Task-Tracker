@@ -1,0 +1,292 @@
+## DAY 1 – Environment Setup (Windows 11)  
+**Goal**: React + Flask running locally  
+- [ ] Install **Node.js (LTS)** → `node --version`  
+- [ ] Install **Python 3** → Check **"Add to PATH"** → `python --version`  
+- [ ] Install **VS Code** + Extensions: Python, ES7+ React  
+- [ ] Open terminal in VS Code (`Ctrl + ``)  
+- [ ] Run:  
+  ```bash
+  npx create-react-app task-tracker
+  cd task-tracker
+  npm start
+  ```
+  → React at **http://localhost:3000**  
+- [ ] Open **new terminal tab** (`Ctrl + T`)  
+- [ ] Run:  
+  ```bash
+  mkdir backend && cd backend
+  python -m venv venv
+  venv\Scripts\activate
+  pip install flask flask-cors
+  ```
+- [ ] Create `backend/app.py`:
+  ```python
+  from flask import Flask, jsonify
+  from flask_cors import CORS
+  app = Flask(__name__)
+  CORS(app)
+  @app.route('/')
+  def home():
+      return jsonify({"message": "Hello from Flask!"})
+  if __name__ == '__main__':
+      app.run(debug=True, port=5000)
+  ```
+- [ ] Run: `python app.py` → **http://localhost:5000** → See JSON  
+- [ ] Change `App.js` title to: `<h1>Personal Task Tracker</h1>`  
+- [ ] **Reply**: “Day 1 done!”
+
+---
+
+## DAY 2 – React: Static Task List  
+**Goal**: Display hardcoded tasks in React  
+- [ ] Stop React (`Ctrl + C`), restart with `npm start`  
+- [ ] In `src/App.js`, replace content with:
+  ```jsx
+  const tasks = [
+    { id: 1, title: "Learn React", completed: false },
+    { id: 2, title: "Build API", completed: false }
+  ];
+  ```
+- [ ] Map over `tasks` → render `<li>` with checkbox and title  
+- [ ] Add basic CSS in `App.css`: spacing, font  
+- [ ] **Bonus**: Add a header: “My Tasks”  
+- [ ] **Reply**: “Day 2 done! Static list shown”
+
+---
+
+## DAY 3 – React: Add Task Form  
+**Goal**: Input + button to add task  
+- [ ] Add state: `const [newTask, setNewTask] = useState("")`  
+- [ ] Add `<input>` + `<button>Add Task</button>`  
+- [ ] On submit:  
+  - Prevent default  
+  - Add to local `tasks` array with `id: Date.now()`  
+  - Clear input  
+- [ ] Show updated list instantly  
+- [ ] **Reply**: “Day 3 done! Can add tasks”
+
+---
+
+## DAY 4 – Flask: Return Tasks from API  
+**Goal**: `/tasks` GET endpoint  
+- [ ] In `backend/app.py`, add:
+  ```python
+  tasks = [
+      {"id": 1, "title": "Learn Flask", "completed": False},
+      {"id": 2, "title": "Connect to React", "completed": False}
+  ]
+
+  @app.route('/tasks', methods=['GET'])
+  def get_tasks():
+      return jsonify(tasks)
+  ```
+- [ ] Test in browser: **http://localhost:5000/tasks**  
+- [ ] **Reply**: “Day 4 done! API returns tasks”
+
+---
+
+## DAY 5 – Connect React → Flask (GET)  
+**Goal**: Fetch tasks from API  
+- [ ] In `App.js`, add `useEffect`:
+  ```js
+  useEffect(() => {
+    fetch('http://localhost:5000/tasks')
+      .then(res => res.json())
+      .then(data => setTasks(data));
+  }, []);
+  ```
+- [ ] Remove hardcoded tasks → use API data  
+- [ ] Show loading text while fetching  
+- [ ] **Reply**: “Day 5 done! Tasks from API”
+
+---
+
+## DAY 6 – Flask: Add Task (POST)  
+**Goal**: Save new task via API  
+- [ ] In `app.py`:
+  ```python
+  from flask import request
+
+  @app.route('/tasks', methods=['POST'])
+  def add_task():
+      data = request.json
+      new_task = {
+          "id": len(tasks) + 1,
+          "title": data['title'],
+          "completed": False
+      }
+      tasks.append(new_task)
+      return jsonify(new_task), 201
+  ```
+- [ ] Test with **Postman** or curl  
+- [ ] **Reply**: “Day 6 done! POST works”
+
+---
+
+## DAY 7 – React: Send New Task to API  
+**Goal**: Add task → POST → refresh list  
+- [ ] On form submit:
+  ```js
+  fetch('http://localhost:5000/tasks', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: newTask })
+  })
+  .then(() => fetchTasks()); // refresh
+  ```
+- [ ] Clear input after success  
+- [ ] **Reply**: “Day 7 done! Add → API → UI”
+
+---
+
+## DAY 8 – PostgreSQL Setup  
+**Goal**: Local database running  
+- [ ] Install **PostgreSQL** → [postgresapp.com](https://postgresapp.com) (or use Docker)  
+- [ ] Open **pgAdmin** or **PSQL**  
+- [ ] Create database: `CREATE DATABASE taskdb;`  
+- [ ] In `backend`, install:
+  ```bash
+  pip install flask-sqlalchemy psycopg2-binary
+  ```
+- [ ] **Reply**: “Day 8 done! DB ready”
+
+---
+
+## DAY 9 – Flask + SQLAlchemy Model  
+**Goal**: Task model in DB  
+- [ ] In `app.py`:
+  ```python
+  app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/taskdb'
+  db = SQLAlchemy(app)
+
+  class Task(db.Model):
+      id = db.Column(db.Integer, primary_key=True)
+      title = db.Column(db.String(200), nullable=False)
+      completed = db.Column(db.Boolean, default=False)
+  ```
+- [ ] Run in Python shell:
+  ```python
+  from app import db
+  db.create_all()
+  ```
+- [ ] **Reply**: “Day 9 done! Table created”
+
+---
+
+## DAY 10 – CRUD API with DB  
+**Goal**: Full GET/POST/DELETE/PUT  
+- [ ] Replace in-memory `tasks` with DB queries  
+- [ ] Implement:
+  - GET `/tasks`
+  - POST `/tasks`
+  - DELETE `/tasks/<id>`
+  - PUT `/tasks/<id>` (toggle complete)  
+- [ ] Test all with **Postman**  
+- [ ] **Reply**: “Day 10 done! Full CRUD”
+
+---
+
+## DAY 11 – React: Delete & Toggle  
+**Goal**: Full sync with DB  
+- [ ] Add **Delete** button → `fetch(..., {method: 'DELETE'})`  
+- [ ] Add **Checkbox** → `PUT` to toggle `completed`  
+- [ ] Update UI instantly  
+- [ ] **Reply**: “Day 11 done! Delete & complete work”
+
+---
+
+## DAY 12 – Styling with Tailwind CSS  
+**Goal**: Clean, responsive UI  
+- [ ] In `task-tracker`:  
+  ```bash
+  npm install -D tailwindcss postcss autoprefixer
+  npx tailwindcss init -p
+  ```
+- [ ] Configure `tailwind.config.js` + add to `index.css`  
+- [ ] Style: cards, buttons, hover, mobile-friendly  
+- [ ] **Reply**: “Day 12 done! Looks professional”
+
+---
+
+## DAY 13 – Error Handling & Loading  
+**Goal**: Robust UX  
+- [ ] Show **"Loading..."** during fetch  
+- [ ] Show **error toast** if API fails  
+- [ ] Disable button during submit  
+- [ ] **Reply**: “Day 13 done! Smooth UX”
+
+---
+
+## DAY 14 – Git & Version Control  
+**Goal**: Save progress  
+- [ ] Initialize Git in both folders  
+- [ ] Create GitHub repo → push code  
+- [ ] **Reply**: “Day 14 done! On GitHub”
+
+---
+
+## DAY 15 – Deploy Backend (Render.com)  
+**Goal**: Live API  
+- [ ] Push `backend` to GitHub  
+- [ ] Sign up at [render.com](https://render.com)  
+- [ ] New **Web Service** → Connect GitHub → Python  
+- [ ] Set start command: `python app.py`  
+- [ ] Get live URL: `https://task-api.onrender.com/tasks`  
+- [ ] **Reply**: “Day 15 done! API live”
+
+---
+
+## DAY 16 – Deploy Frontend (Netlify)  
+**Goal**: Live web app  
+- [ ] In React: change API URL to Render URL  
+- [ ] `npm run build`  
+- [ ] Drag `build` folder to [netlify.com](https://netlify.com)  
+- [ ] Get live URL: `https://mytasktracker.netlify.app`  
+- [ ] **Reply**: “Day 16 done! App live”
+
+---
+
+## DAY 17 – Test Live App  
+**Goal**: Works on phone  
+- [ ] Open on phone → add/delete tasks  
+- [ ] Refresh → data persists  
+- [ ] **Reply**: “Day 17 done! Works on mobile browser”
+
+---
+
+## DAY 18 – Mobile Prep: React Native Intro  
+**Goal**: Reuse code for mobile  
+- [ ] Install **Expo CLI**: `npm install -g expo-cli`  
+- [ ] `expo init mobile-task` → Blank template  
+- [ ] Copy React logic (hooks, API calls)  
+- [ ] Run on phone via **Expo Go** app  
+- [ ] **Reply**: “Day 18 done! Mobile prototype”
+
+---
+
+## DAY 19 – Bonus: Due Dates  
+**Goal**: Add date picker  
+- [ ] Add `dueDate` field in DB + API  
+- [ ] Use `<input type="date">` in React  
+- [ ] Show in UI with formatting  
+- [ ] **Reply**: “Day 19 done! Due dates added”
+
+---
+
+## DAY 20 – Wrap-Up & Showcase  
+**Goal**: You’re a full-stack dev!  
+- [ ] Write 1-page summary: What you learned  
+- [ ] Share live links with friends  
+- [ ] Plan next feature (e.g., user login)  
+- [ ] **Reply**: “Day 20 done! Project complete!”
+
+---
+
+**You did it!**  
+By **Dec 31, 2025**, you’ll have:  
+- A **live web app**  
+- A **mobile-ready API**  
+- **Full-stack skills** (React, Flask, Postgres, Deploy)  
+- **Confidence** to build anything
+
+---
