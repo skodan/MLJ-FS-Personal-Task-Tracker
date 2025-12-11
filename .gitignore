@@ -1,0 +1,24 @@
+# Node / React
+node_modules/
+task-tracker/node_modules/
+task-tracker/build/
+task-tracker/.env
+
+# Python
+__pycache__/
+*.pyc
+venv/
+backend/venv/
+backend/__pycache__/
+
+# Environment
+.env
+.env.local
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# OS
+Thumbs.db
+.DS_Store
